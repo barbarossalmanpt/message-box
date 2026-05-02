@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>my films</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F9F6F0;
+    --card: #fff;
+    --ink: #1a1814;
+    --muted: #7a7468;
+    --border: #e0dbd2;
+    --surface: #faf8f4;
+    --star: #E8A320;
+    --star-empty: #d4cfc7;
+    --accent: #C1440E;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .app {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+  }
+  .header span {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Add section */
+  .add-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .add-grid {
+    display: grid;
+    grid-template-columns: 1fr 80px;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .field label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display: block;
+  }
+  .field input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { border-color: #a09a91; }
+
+  .note-row {
+    margin-bottom: 14px;
+  }
+
+  .bottom-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .star-picker {
+    display: flex;
+    gap: 4px;
+  }
+  .star-picker span {
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.1s, color 0.1s;
+    line-height: 1;
+    color: var(--star-empty);
+    user-select: none;
+  }
+  .star-picker span:hover, .star-picker span.lit { color: var(--star); }
+  .star-picker span:active { transform: scale(1.3); }
+
+  .add-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: #333; }
+  .add-btn:active { transform: scale(0.98); }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  /* Sort row */
+  .sort-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+  .count-lbl { font-size: 13px; color: var(--muted); }
+  .sort-btns { display: flex; gap: 6px; }
+  .sort-btn {
+    font-size: 12px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .sort-btn:hover { border-color: #a09a91; color: var(--ink); }
+  .sort-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* Movie list */
+  .movie-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .movie-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .movie-card:hover { border-color: #b0a99f; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+
+  .rank {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px;
+    color: var(--star-empty);
+    min-width: 22px;
+    text-align: right;
+  }
+
+  .poster {
+    width: 44px;
+    height: 62px;
+    border-radius: 6px;
+    background: #ece7df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .info { flex: 1; min-width: 0; }
+  .title-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .movie-title { font-family: 'DM Serif Display', serif; font-size: 17px; font-weight: 400; }
+  .movie-year { font-size: 12px; color: var(--muted); }
+  .note-text {
+    font-size: 13px; color: var(--muted); margin-top: 2px;
+    font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .stars-row { display: flex; gap: 2px; margin-top: 6px; }
+  .stars-row span { font-size: 15px; }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--star-empty);
+    padding: 6px;
+    line-height: 1;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .delete-btn:hover { color: var(--accent); background: #fdf0ec; }
+
+  .empty-state {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 15px;
+    border: 1px dashed var(--border);
+    border-radius: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <h1>my films</h1>
+    <span>a personal diary</span>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-section">
+    <div class="add-grid">
+      <div class="field">
+        <label>film title</label>
+        <input id="titleInput" type="text" placeholder="e.g. Mulholland Drive" />
+      </div>
+      <div class="field">
+        <label>year</label>
+        <input id="yearInput" type="text" placeholder="2001" />
+      </div>
+    </div>
+    <div class="note-row field">
+      <label>note (optional)</label>
+      <input id="noteInput" type="text" placeholder="one word or short phrase..." />
+    </div>
+    <div class="bottom-row">
+      <div>
+        <label style="font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;display:block;margin-bottom:5px">rating</label>
+        <div class="star-picker" id="starPicker">
+          <span data-v="1">★</span>
+          <span data-v="2">★</span>
+          <span data-v="3">★</span>
+          <span data-v="4">★</span>
+          <span data-v="5">★</span>
+        </div>
+      </div>
+      <button class="add-btn" onclick="addMovie()">+ log film</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-lbl">films logged</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statAvg">—</div>
+      <div class="stat-lbl">avg rating</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statTop">—</div>
+      <div class="stat-lbl">top rated</div>
+    </div>
+  </div>
+
+  <!-- Sort & list -->
+  <div class="sort-row">
+    <span class="count-lbl" id="countLabel">0 films</span>
+    <div class="sort-btns">
+      <button class="sort-btn active" id="btn-recent" onclick="setSort('recent')">recent</button>
+      <button class="sort-btn" id="btn-rating" onclick="setSort('rating')">rating</button>
+      <button class="sort-btn" id="btn-alpha" onclick="setSort('alpha')">a–z</button>
+    </div>
+  </div>
+
+  <div class="movie-list" id="movieList">
+    <div class="empty-state">no films logged yet — add your first one above</div>
+  </div>
+
+</div>
+
+<script>
+  let movies = JSON.parse(localStorage.getItem('myfilms') || '[]');
+  let selectedStars = 0;
+  let sortMode = 'recent';
+
+  const picker = document.getElementById('starPicker');
+  picker.querySelectorAll('span').forEach(s => {
+    s.addEventListener('mouseenter', () => highlightStars(+s.dataset.v));
+    s.addEventListener('mouseleave', () => highlightStars(selectedStars));
+    s.addEventListener('click', () => {
+      selectedStars = +s.dataset.v;
+      highlightStars(selectedStars);
+    });
+  });
+
+  function highlightStars(n) {
+    picker.querySelectorAll('span').forEach((s, i) => s.classList.toggle('lit', i < n));
+  }
+
+  function save() {
+    localStorage.setItem('myfilms', JSON.stringify(movies));
+  }
+
+  function addMovie() {
+    const title = document.getElementById('titleInput').value.trim();
+    if (!title) { document.getElementById('titleInput').focus(); return; }
+    const year = document.getElementById('yearInput').value.trim();
+    const note = document.getElementById('noteInput').value.trim();
+    movies.push({ id: Date.now(), title, year, note, rating: selectedStars, ts: Date.now() });
+    document.getElementById('titleInput').value = '';
+    document.getElementById('yearInput').value = '';
+    document.getElementById('noteInput').value = '';
+    selectedStars = 0;
+    highlightStars(0);
+    save();
+    render();
+  }
+
+  function deleteMovie(id) {
+    movies = movies.filter(m => m.id !== id);
+    save();
+    render();
+  }
+
+  function setSort(mode) {
+    sortMode = mode;
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + mode).classList.add('active');
+    render();
+  }
+
+  function getSorted() {
+    const arr = [...movies];
+    if (sortMode === 'rating') return arr.sort((a, b) => b.rating - a.rating || b.ts - a.ts);
+    if (sortMode === 'alpha') return arr.sort((a, b) => a.title.localeCompare(b.title));
+    return arr.sort((a, b) => b.ts - a.ts);
+  }
+
+  function starsHtml(n) {
+    return Array.from({ length: 5 }, (_, i) =>
+      `<span style="color:${i < n ? 'var(--star)' : 'var(--star-empty)'}">★</span>`
+    ).join('');
+  }
+
+  const emojiMap = {a:'🎭',b:'🔮',c:'🌙',d:'🎬',e:'🎥',f:'🎞',g:'🌊',h:'🏔',i:'🌿',j:'🦋',k:'🔥',l:'💫',m:'🎪',n:'🌸',o:'🕯',p:'🌺',q:'🎨',r:'🌙',s:'⭐',t:'🎠',u:'🌌',v:'🎭',w:'🌊',x:'💎',y:'🌟',z:'🎪'};
+  function getEmoji(title) {
+    return emojiMap[(title[0] || 'a').toLowerCase()] || '🎬';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function render() {
+    const sorted = getSorted();
+    document.getElementById('statTotal').textContent = movies.length;
+
+    const rated = movies.filter(m => m.rating > 0);
+    document.getElementById('statAvg').textContent = rated.length
+      ? (rated.reduce((s, m) => s + m.rating, 0) / rated.length).toFixed(1)
+      : '—';
+
+    const top = [...movies].sort((a, b) => b.rating - a.rating)[0];
+    document.getElementById('statTop').textContent = top && top.rating > 0
+      ? (top.title.length > 8 ? top.title.split(' ')[0] : top.title)
+      : '—';
+
+    document.getElementById('countLabel').textContent =
+      movies.length + (movies.length === 1 ? ' film' : ' films');
+
+    const list = document.getElementById('movieList');
+    if (!sorted.length) {
+      list.innerHTML = '<div class="empty-state">no films logged yet — add your first one above</div>';
+      return;
+    }
+
+    list.innerHTML = sorted.map((m, i) => `
+      <div class="movie-card">
+        <span class="rank">${i + 1}</span>
+        <div class="poster">${getEmoji(m.title)}</div>
+        <div class="info">
+          <div class="title-row">
+            <span class="movie-title">${esc(m.title)}</span>
+            ${m.year ? `<span class="movie-year">${esc(m.year)}</span>` : ''}
+          </div>
+          ${m.note ? `<div class="note-text">${esc(m.note)}</div>` : ''}
+          <div class="stars-row">${starsHtml(m.rating)}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteMovie(${m.id})" title="remove">✕</button>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('titleInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addMovie();
+  });
+
+  render();
+</script>
+</body>
+</html>
